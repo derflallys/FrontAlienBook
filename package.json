@@ -1,0 +1,23 @@
+{
+  "name": "front_alienbook",
+  "version": "1.0.0",
+  "description": "This project is an application skeleton for a typical [AngularJS][angularjs] web app. You can use it to quickly bootstrap your angular webapp projects and dev environment for these projects.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server -a localhost -p 8080 -c-1 ./app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derflallys/FrontAlienBook.git"
+  },
+  "author": "alfred",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/derflallys/FrontAlienBook/issues"
+  },
+  "homepage": "https://github.com/derflallys/FrontAlienBook#readme",
+  "devDependencies": {
+    "http-server": "^0.9.0"
+  }
+}

@@ -1,0 +1,50 @@
+<div>
+    <nav class="navbar navbar-light bg-light">
+        <form class="form-inline" name="searchUser" ng-submit="search(username)">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" required ng-model="username" >
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </nav>
+</div>
+
+<div>
+    <h1>Find your Friend Alien </h1>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>Age</th>
+            <th>Family</th>
+            <th>Food</th>
+            <th>Race</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="alien in aliens">
+            <td>
+                <a href="#!/alien/{{alien.username}}">
+                    {{ alien.username }}
+                </a>
+
+            </td>
+            <td>
+                {{ alien.age }}
+            </td>
+            <td>
+                {{ alien.family }}
+            </td>
+            <td>
+                {{ alien.food }}
+            </td>
+            <td>
+                {{ alien.race }}
+            </td>
+
+            <td>
+                <a href="#!/alien/{{alien.username}}" class="btn btn-xs btn-success">Add Friend</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
