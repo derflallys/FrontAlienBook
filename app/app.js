@@ -83,11 +83,15 @@ app.controller('ProfileController',function ($scope,alienservice,$routeParams) {
 
 app.controller('RegisterController',function ($scope,alienservice,$location) {
     $scope.register = "Register";
+    var onError = function(reason) {
+        $scope.error = "Could not fetch the data.";
+    };
     $scope.Onregister = function (alien) {
         alienservice.register(alien).then(function (value) {
+
             console.log(value);
             $location.path("/login");
-        },function (reason) { console.log(reason) });
+        },onError);
     };
 });
 
@@ -162,6 +166,9 @@ app.factory("alienservice", function ($http,$cookies) {
 
         };
      return   $http.post("http://localhost:8000/pai/register",JSON.stringify(data),{data:JSON.stringify(data),method:"POST",headers : {'Content-Type': 'application/json','Authorization': auth}})
+         .then(function (response) {
+             return response.data;
+         });
     };
 
     var login = function (alien) {
