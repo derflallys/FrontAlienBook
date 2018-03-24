@@ -1,5 +1,6 @@
-var app= angular.module('alienbook', ["ngRoute"]);
-    app.config(function ($routeProvider) {
+var app= angular.module('alienbook', ["ngRoute","ngCookies"]);
+
+    app.config(function ($routeProvider,$locationProvider) {
         $routeProvider
             .when("/main",{
                 controller: "MainController",
@@ -18,42 +19,99 @@ var app= angular.module('alienbook', ["ngRoute"]);
                 templateUrl:  "views/listalien.html"
             })
             .when("/alien/:username",{
+                controller: "ProfileController",
+                templateUrl:  "views/alien.html"
+            })
+            .when("/logout",{
                 controller: "MainController",
                 templateUrl:  "views/alien.html"
             })
 
 
-            .otherwise({redirectTo: "/main"})
+
+            .otherwise({redirectTo: "/main"});
+        $locationProvider.html5Mode(true)
     });
 
-app.controller('MainController', function ($scope,alienservice,$routeParams) {
+app.controller('MainController', function ($scope,alienservice,$cookies,$routeParams,$route) {
     $scope.welcome = "Welcome Alien";
     var onError = function(reason) {
         $scope.error = "Could not fetch the data.";
     };
+    if($cookies.get('alien'))
+        $scope.username = $cookies.get('alien').replace(/['"]+/g, '');
+    else
+        $scope.username ='';
 
-        alienservice.getAlien($routeParams.username).then(function (value) {
-            $scope.alien = value;
+    $scope.Onlogout = function () {
+        $cookies.remove('token');
+        $cookies.remove('alien');
+        $route.reload();
+    };
+
+    $scope.profile = function (username) {
+        alienservice.getAlien(username).then(function (value) {
+            $scope.user = value;
+            console.log(value);
         },onError);
-
+    }
 
 
 });
+
+app.controller('ProfileController',function ($scope,alienservice,$routeParams) {
+    var onError = function(reason) {
+        $scope.error = "Could not fetch the data.";
+    };
+    alienservice.getAlien($routeParams.username).then(function (value) {
+        $scope.user = value;
+    },onError);
+    $scope.myfriend = function () {
+        alienservice.getFriends().then(function (value) {
+            $scope.friends = value;
+            console.log(value);
+        },onError);
+    };
+
+    $scope.remove = function (id) {
+        console.log(id);
+        alienservice.removeFriend(id).then(function (value) {
+            $scope.friends = value;
+        })
+    }
+});
+
 app.controller('RegisterController',function ($scope,alienservice,$location) {
     $scope.register = "Register";
     $scope.Onregister = function (alien) {
-        alienservice.register(alien).
-        then(function (value) {
+        alienservice.register(alien).then(function (value) {
+            console.log(value);
             $location.path("/login");
-        },function (reason) { console.log(reason) });;
+        },function (reason) { console.log(reason) });
     };
 });
 
-app.controller('LoginController',function ($scope,alienservice) {
+app.controller('LoginController',function ($scope,alienservice,$location,$cookies,$cookieStore,$route) {
+    $scope.token ='';
+
+    $scope.Onlogin =function (alien) {
+        alienservice.login(alien).then(function (value) {
+            console.log(value);
+
+            $cookieStore.put('token',value.data.token);
+            $cookieStore.put('alien',value.data.alien.username);
+            $scope.token  = $cookies.get('token');
+            console.log('dans login');
+            console.log($scope.token);
+
+            $location.path("/alien/"+value.data.alien.username);
+
+        },function (reason) { console.log(reason) });
+    };
 
 });
 
-app.controller('ListAlien',function ($scope,alienservice) {
+app.controller('ListAlien',function ($scope,alienservice,$cookies,$location) {
     var onError = function(reason) {
         $scope.error = "Could not fetch the data.";
     };
@@ -66,47 +124,101 @@ app.controller('ListAlien',function ($scope,alienservice) {
         alienservice.searchAlien(username).then(function (value) {
             $scope.aliens = value;
         },onError)
+    };
+    $scope.me_username = $cookies.get('alien').replace(/['"]+/g, '');
+    console.log($scope.me_username);
+    $scope.add = function (username) {
+        alienservice.addfriend(username).then(function (value) {
+
+            $location.path("/alien/"+$scope.me_username);
+        },onError)
     }
 
 });
 
-app.factory("alienservice", function ($http) {
+app.factory("alienservice", function ($http,$cookies) {
+   var auth ='';
+    if($cookies.get('token'))
+        auth = "Bearer "+$cookies.get('token').replace(/['"]+/g, '');
+
+    console.log(auth);
     var getAlien = function (username) {
-        return $http.get("http://localhost:8000/api/alien/"+username)
+
+        return $http.get("http://localhost:8000/api/alien/"+username,{method:"POST",headers : {'Content-Type': 'application/json','Authorization': auth }})
             .then(function (response) {
                 return response.data;
             });
     };
     
     var register = function (alien) {
-     return   $http.post("http://localhost:8000/api/register",alien,{method:"POST",headers : {'Content-Type': 'application/json'}})
+        var data ={
+            email: alien.email,
+            username: alien.username,
+            age: alien.age,
+            family:alien.family,
+            race:alien.race,
+            food:alien.food,
+            password:alien.password
+
+        };
+     return   $http.post("http://localhost:8000/pai/register",JSON.stringify(data),{data:JSON.stringify(data),method:"POST",headers : {'Content-Type': 'application/json','Authorization': auth}})
     };
 
     var login = function (alien) {
-        $http.post("http://localhost:8000/api/login",alien).then(function (value) {
-            return value;
-        });
+
+        const credentials = 'Basic ' + btoa(alien.username + ':' + alien.password);
+       return $http.post("http://localhost:8000/api/login",alien,{method:"POST", headers : {'Content-Type': 'application/json','PHP_AUTH_USER': alien.username,'PHP_AUTH_PW': alien.password,'Authorization': 'Basic '+credentials }});
     };
     var listalien =function () {
-       return $http.get("http://localhost:8000/api/aliens")
+
+       return $http.get("http://localhost:8000/api/aliens",{headers :{'Content-Type': 'application/json','Authorization': auth}})
             .then(function (response) {
                 return response.data;
             });
     } ;
 
     var searchAlien = function (username) {
-        return $http.get("http://localhost:8000/api/search/"+username)
+        return $http.get("http://localhost:8000/api/search/"+username,{headers :{'Authorization': auth}})
             .then(function (response) {
                 return response.data;
             });
     };
+    
+    var addfriend = function (username) {
+        var data ={
+            username: username
+
+        };
+
+        return $http.post("http://localhost:8000/api/addfriend",JSON.stringify(data),{data:JSON.stringify(data), method:"POST" ,headers : {'Content-Type': 'application/json','Authorization': auth}}).then(function (response) {
+            return response.data;
+        });
+    };
+    var getFriends = function () {
+        return $http.get("http://localhost:8000/api/myfriends",{headers : {'Content-Type': 'application/json','Authorization': auth}}).then(function (response) {
+            return response.data;
+        });
+    };
+
+    var removeFriend = function (id) {
+        return $http.delete("http://localhost:8000/api/removefriend/"+id,{method:"DELETE",headers : {'Content-Type': 'application/json','Authorization': auth}}).then(function (response) {
+            return response.data;
+        });
+    };
+
+
+
 
     return {
         getAlien: getAlien,
         register: register,
         login: login,
         listalien: listalien,
-        searchAlien: searchAlien
+        searchAlien: searchAlien,
+        addfriend: addfriend,
+        getFriends: getFriends,
+        removeFriend: removeFriend
+
     };
 });
 

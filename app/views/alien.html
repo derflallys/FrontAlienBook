@@ -1,9 +1,86 @@
-<div>
-  Family:   {{alien.family}}
-</div>
-<div>
-  Race:   {{alien.race}}
-</div>
-<div>
-  Username:   {{alien.username}}
+<div ng-show="user">
+    <h1>My Profile</h1>
+
+  <a href="" ng-click="edit()" class="btn btn-xs btn-primary">Edit Profile</a>
+  <table class="table table-striped" >
+    <thead>
+    <tr>
+      <th>Username</th>
+      <th>Age</th>
+      <th>Family</th>
+      <th>Food</th>
+      <th>Race</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr >
+      <td>
+        <a href="#!/user/{{user.username}}">
+          {{ user.username }}
+        </a>
+
+      </td>
+      <td>
+        {{ user.age }}
+      </td>
+      <td>
+        {{ user.family }}
+      </td>
+      <td>
+        {{ user.food }}
+      </td>
+      <td>
+        {{ user.race }}
+      </td>
+
+      <td>
+        <a href="#" ng-click="myfriend()" class="btn btn-xs btn-success">My Friend</a>
+      </td>
+    </tr>
+    </tbody>
+
+  </table>
+    <div ng-show="friends">
+        <h2>List of my friend</h2>
+        <table class="table table-striped" >
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>Age</th>
+                <th>Family</th>
+                <th>Food</th>
+                <th>Race</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="friend in friends">
+                <td>
+                    <a href="/alien/{{friend.username}}">
+                        {{ friend.username }}
+                    </a>
+
+                </td>
+                <td>
+                    {{ friend.age }}
+                </td>
+                <td>
+                    {{ friend.family }}
+                </td>
+                <td>
+                    {{ friend.food }}
+                </td>
+                <td>
+                    {{ friend.race }}
+                </td>
+
+                <td>
+                    <a href="#" ng-click="remove(friend.id)" class="btn btn-xs btn-danger">Remove Friend</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
 </div>
