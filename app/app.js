@@ -26,8 +26,10 @@ var app= angular.module('alienbook', ["ngRoute","ngCookies"]);
                 controller: "MainController",
                 templateUrl:  "views/alien.html"
             })
-
-
+            .when("/edit",{
+                controller: "ProfileController",
+                templateUrl:  "views/edit.html"
+            })
 
             .otherwise({redirectTo: "/main"});
         $locationProvider.html5Mode(true)
@@ -59,7 +61,7 @@ app.controller('MainController', function ($scope,alienservice,$cookies,$routePa
 
 });
 
-app.controller('ProfileController',function ($scope,alienservice,$routeParams) {
+app.controller('ProfileController',function ($scope,alienservice,$routeParams,$location) {
     var onError = function(reason) {
         $scope.error = "Could not fetch the data.";
     };
@@ -78,6 +80,16 @@ app.controller('ProfileController',function ($scope,alienservice,$routeParams) {
         alienservice.removeFriend(id).then(function (value) {
             $scope.friends = value;
         })
+    };
+
+    $scope.edit = function () {
+        $location.path("/edit");
+    }
+
+    $scope.Onedit = function (alien) {
+        alienservice.editProfile(alien).then(function (value) {
+            $scope.user = value;
+        },onError);
     }
 });
 
@@ -171,6 +183,25 @@ app.factory("alienservice", function ($http,$cookies) {
          });
     };
 
+    var editProfile = function (alien) {
+        var data ={
+            email: alien.email,
+            username: alien.username,
+            age: alien.age,
+            family:alien.family,
+            race:alien.race,
+            food:alien.food,
+            password:alien.password
+
+        };
+     return   $http.patch("http://localhost:8000/api/edit",JSON.stringify(data),{data:JSON.stringify(data),method:"POST",headers : {'Content-Type': 'application/json','Authorization': auth}})
+         .then(function (response) {
+             return response.data;
+         });
+    };
+
+
+
     var login = function (alien) {
 
         const credentials = 'Basic ' + btoa(alien.username + ':' + alien.password);
@@ -216,6 +247,8 @@ app.factory("alienservice", function ($http,$cookies) {
 
 
 
+
+
     return {
         getAlien: getAlien,
         register: register,
@@ -224,7 +257,8 @@ app.factory("alienservice", function ($http,$cookies) {
         searchAlien: searchAlien,
         addfriend: addfriend,
         getFriends: getFriends,
-        removeFriend: removeFriend
+        removeFriend: removeFriend,
+        editProfile: editProfile
 
     };
 });

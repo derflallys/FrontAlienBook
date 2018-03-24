@@ -1,0 +1,38 @@
+<h1>Edit Profile</h1>
+
+<div>
+    <div class="alert alert-danger" role="alert" ng-show="error">
+        {{error}}
+    </div>
+    <form ng-submit="Onedit(alien)">
+        <div class="form-group">
+            <label for="email">Email </label>
+            <input type="email" class="form-control" id="email" value="{{user.email}}"  ng-model="alien.email" >
+        </div>
+        <div class="form-group">
+            <label for="username">Username </label>
+            <input type="text" class="form-control" id="username" value="{{user.username}}" ng-model="alien.username" >
+        </div>
+        <div class="form-group">
+            <label for="age">Age </label>
+            <input type="number" class="form-control" id="age" value="{{user.age}}" ng-model="alien.age" >
+        </div>
+        <div class="form-group">
+            <label for="family">Family </label>
+            <input type="text" class="form-control" id="family" value="{{user.family}}" ng-model="alien.family" >
+        </div>
+        <div class="form-group">
+            <label for="race">Race </label>
+            <input type="text" class="form-control" id="race" value="{{user.race}}" ng-model="alien.race" >
+        </div>
+        <div class="form-group">
+            <label for="food">Food </label>
+            <input type="text" class="form-control" id="food" value="{{user.food}}" ng-model="alien.food" >
+        </div>
+        <div class="form-group">
+            <label for="password">Password </label>
+            <input type="password" class="form-control" id="password" ng-model="alien.password" >
+        </div>
+        <input type="submit" class="btn btn-primary" value="Register">
+    </form>
+</div>
