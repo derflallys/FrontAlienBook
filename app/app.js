@@ -35,7 +35,7 @@ var app= angular.module('alienbook', ["ngRoute","ngCookies"]);
         $locationProvider.html5Mode(true)
     });
 
-app.controller('MainController', function ($scope,alienservice,$cookies,$routeParams,$route) {
+app.controller('MainController', function ($scope,alienservice,$cookies,$routeParams,$route,$location) {
     $scope.welcome = "Welcome Alien";
     var onError = function(reason) {
         $scope.error = "Could not fetch the data.";
@@ -48,7 +48,7 @@ app.controller('MainController', function ($scope,alienservice,$cookies,$routePa
     $scope.Onlogout = function () {
         $cookies.remove('token');
         $cookies.remove('alien');
-        $route.reload();
+        $location.path('/');
     };
 
     $scope.profile = function (username) {
@@ -65,6 +65,7 @@ app.controller('ProfileController',function ($scope,alienservice,$routeParams,$l
     var onError = function(reason) {
         $scope.error = "Could not fetch the data.";
     };
+
     alienservice.getAlien($routeParams.username).then(function (value) {
         $scope.user = value;
     },onError);
@@ -83,10 +84,13 @@ app.controller('ProfileController',function ($scope,alienservice,$routeParams,$l
     };
 
     $scope.edit = function () {
+
+        console.log($scope.user);
         $location.path("/edit");
     }
 
     $scope.Onedit = function (alien) {
+
         alienservice.editProfile(alien).then(function (value) {
             $scope.user = value;
         },onError);
@@ -120,7 +124,7 @@ app.controller('LoginController',function ($scope,alienservice,$location,$cookie
             console.log('dans login');
             console.log($scope.token);
 
-            $location.path("/alien/"+value.data.alien.username);
+            $location.path("/main");
 
         },function (reason) { console.log(reason) });
     };
@@ -128,6 +132,7 @@ app.controller('LoginController',function ($scope,alienservice,$location,$cookie
 });
 
 app.controller('ListAlien',function ($scope,alienservice,$cookies,$location) {
+    $scope.error = "";
     var onError = function(reason) {
         $scope.error = "Could not fetch the data.";
     };
@@ -194,7 +199,7 @@ app.factory("alienservice", function ($http,$cookies) {
             password:alien.password
 
         };
-     return   $http.patch("http://localhost:8000/api/edit",JSON.stringify(data),{data:JSON.stringify(data),method:"POST",headers : {'Content-Type': 'application/json','Authorization': auth}})
+     return   $http.patch("http://localhost:8000/api/edit",JSON.stringify(data),{data:JSON.stringify(data),method:"PATCH",headers : {'Content-Type': 'application/json','Authorization': auth}})
          .then(function (response) {
              return response.data;
          });
